@@ -85,7 +85,7 @@ class Item(Resource):
                 self.update(updated_item)
             except:
                 return {"message": "An error occurred updating the item."}, 500
-        return item
+        return updated_item
 
     @classmethod
     def update(cls, item):
@@ -100,4 +100,15 @@ class Item(Resource):
 
 class ItemList(Resource):
     def get(self):
+        connection = sqlite3.connect('data.db')
+        cursor = connection.cursor()
+
+        query = "SELECT * FROM items"
+        result = cursor.execute(query)
+        items = []
+        for row in result:
+            items.append({'name': row[0], 'price': row[1]})
+
+        connection.close()
+
         return {'items': items}
