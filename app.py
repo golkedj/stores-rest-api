@@ -15,7 +15,17 @@ app.config['PROPAGATE_EXCEPTIONS'] = True
 app.secret_key = 'dgdevelopment'    # app.config['JWT_SECRET_KEY']
 api = Api(app)
 
+@app.before_first_request
+def create_tables():
+    db.create_all()
+    
 jwt = JWTManager(app)   # not creating /auth
+
+@jwt.user_claims_loader
+def add_claims_to_jwt(identity):
+    if identity == 1:   # Instead of hard-coding, you should read from a config file or a database
+        return {'is_admin': True}
+    return {'is_admin': False}
 
 api.add_resource(Store, '/store/<string:name>')
 api.add_resource(Item, '/item/<string:name>')
@@ -28,9 +38,5 @@ api.add_resource(UserLogin, '/login')
 if __name__ == '__main__':
     from db import db
     db.init_app(app)
-
-    @app.before_first_request
-    def create_tables():
-        db.create_all()
 
     app.run(port=5000, debug=True)
